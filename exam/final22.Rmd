@@ -1,0 +1,199 @@
+---
+title: "Data analysis with R final exam 2022"
+date: '2022-07-04'
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```
+
+```{r message = F, echo = F}
+library(tidyverse)
+```
+
+## 1. 
+
+```{r}
+tmp <- c(4, 6, 3)
+```
+
+Create the vectors
+
+(a) $(4, 6, 3, 4, 6, 3, \dots, 4, 6, 3)$ where there are 10 occurrences of 4.
+    ```{r}
+    rep(c(4,6,3), times=10)
+    ```
+(b) $(4, 4, \dots, 4, 6, 6, \dots, 6, 3, 3, \dots, 3)$ where there are 10 occurrences of 4, 20 occurrences of 6 and 30 occurrences of 3.
+    ```{r}
+    cat(rep(4, each=10), rep(6, each=20), rep(3, each=30))
+    ```
+
+## 2. 
+Execute the following lines which create two vectors of random integers which are chosen with replacement from the integers $0, 1, \dots , 999$. Both vectors have length 250. 
+
+```{r}
+xVec <- sample(0:999, 250, replace=T)
+yVec <- sample(0:999, 250, replace=T)
+```
+
+(a) Create the vector $(y_2 - x_1, \cdots, y_n - x_{n-1}).$
+    ```{r}
+    tmp <- yVec[-1]-xVec[-250]
+    ```
+(b) Pick out the values in yVec which are $> 600$.
+    ```{r}
+    tmp <- yVec[yVec > 600]
+    ```
+(c) What are the index positions in yVec of the values which are $> 600$? 
+    ```{r}
+    which(yVec > 600)
+    ```
+(d) Sort the numbers in the vector xVec in the order of increasing values in yVec. 
+    
+(e) Pick out the elements in yVec at index positions $1, 4, 7, 10, 13, \cdots$
+    ```{r}
+    idx <- seq(1,250, by=3)
+    tmp <- yVec[idx]
+    ```
+
+## 3.
+By using the function cumprod and other functions to calculate:
+
+\[ 1 + \frac{2}{3} + \left(\frac{2}{3}\frac{4}{5}\right) + \left(\frac{2}{3}\frac{4}{5}\frac{6}{7}\right) + \cdots + \left(\frac{2}{3}\frac{4}{5}\cdots\frac{38}{39}\right)
+\]
+
+```{r}
+x <- seq(2,38, by=2) / seq(3,39, by=2)
+result <- 1 + sum(cumprod(x))
+result
+```
+
+## 4. 
+For this problem we'll use the (built-in) dataset state.x77.
+```{r}
+data(state)
+state.x77 <- as.data.frame(state.x77)
+head(state.x77)
+```
+
+a. Find out how many states have an income of less than 4300.
+    ```{r}
+    length(state.x77$Income < 4300)
+    ```
+
+b.	Find out which is the state with the highest income.
+    ```{r}
+    rownames(state.x77[which(state.x77$Income==max(state.x77$Income)),])
+    ```
+
+c.	Add a variable to the data frame which should categorize the level of illiteracy: $[0,1)$ is low, $[1,2)$ is some, $[2, \infty)$ is high.
+    ```{r}
+    library(dplyr)
+    state.x77 <- state.x77 %>% mutate(Level = 
+                ifelse(Illiteracy<1, "low",
+                    ifelse(Illiteracy<2, "some", "high")))
+    head(state.x77)
+    ```
+
+d.	Find out which state with low illiteracy, has the highest income, and what that income is.
+    ```{r}
+    state.tmp <- state.x77 %>% filter(Level=="low")
+    max(state.tmp$Income)
+    rownames(state.tmp[which(state.tmp$Income==max(state.tmp$Income)),])
+    ```
+
+## 5. 
+Simulate 1,000 observations from $(X_1, X_2)$ which follow the uniform distribution over the square $[0, 1] \times [0, 1]$.
+```{r}
+x1 <- runif(1000, 0,1)
+x2 <- runif(1000, 0,1)
+```
+a. Get an approximation of the probability that the distance between $(X_1, X_2)$ and the nearest edge is less than 0.25.
+    ```{r}
+    length(x1[x1<0.25 | 1-x1<0.25 | x2<0.25 | 1-x2<0.25])/1000
+    ```
+
+b. The same question for the distance to the nearest vertex.
+    ```{r}
+    length(x1[x1^2+x2^2<0.25^2 | (1-x1)^2+x2^2<0.25^2 |
+        x1^2+(1-x2)^2<0.25^2 | (1-x1)^2+(1-x2)^2<0.25^2])/1000
+    ```
+
+## 6.
+A discrete random variable $X$ has probability mass function 
+
+```{=latex}
+\begin{center}\begin{tabular}{lrrrrr} $x$ & 0 & 1 & 2 & 3 & 4 \\\hline $p(x)$ & 0.1 & 0.2 & 0.2 & 0.2 & 0.3 \end{tabular}\end{center}
+```
+
+Generate a random sample of size 1000 from the distribution of $X$ using the R `sample()` function. Construct a relative frequency table and compare the empirical with the theoretical probabilities. 
+```{r}
+x <- c(0, 1,1, 2,2, 3,3, 4,4,4)
+samp <- sample(x, size=1000, replace=T)
+res <- data.frame(
+    x_equal_0 = c(0.1, length(samp[samp==0])/1000),
+    x_equal_1 = c(0.2, length(samp[samp==1])/1000),
+    x_equal_2 = c(0.2, length(samp[samp==2])/1000),
+    x_equal_3 = c(0.2, length(samp[samp==3])/1000),
+    x_equal_4 = c(0.3, length(samp[samp==4])/1000)
+)
+rownames(res) <- c("theoretical_Pr", "empirical_Pr")
+res
+```
+
+
+## 7. 
+Mortality rates per 100,000 from male suicides for a number of age groups and a number of countries are given in the following data frame. 
+```{r}
+suicrates <- tibble(Country = c('Canada', 'Israel', 'Japan', 'Austria', 'France', 'Germany',
+'Hungary', 'Italy', 'Netherlands', 'Poland', 'Spain', 'Sweden', 'Switzerland', 'UK', 'USA'), 
+Age25.34 = c(22,  9, 22, 29, 16, 28, 48,  7,  8, 26,  4, 28, 22, 10, 20), 
+Age35.44 = c(27, 19, 19, 40, 25, 35, 65,  8, 11, 29,  7, 41, 34, 13, 22), 
+Age45.54 = c(31, 10, 21, 52, 36, 41, 84, 11, 18, 36, 10, 46, 41, 15, 28), 
+Age55.64 = c(34, 14, 31, 53, 47, 49, 81, 18, 20, 32, 16, 51, 50, 17, 33), 
+Age65.74 = c(24, 27, 49, 69, 56, 52, 107, 27, 28, 28, 22, 35, 51, 22, 37))
+```
+
+a. Transform `suicrates` into *long* form.
+    ```{r}
+    library(reshape)
+    longdata <- melt(as.data.frame(suicrates), id="Country")
+    longdata
+    ```
+
+b. Construct side-by-side box plots for the data from different age groups, and comment on what the graphic tells us about the data. 
+    ```{r}
+    library(ggplot2)
+    ggplot(longdata, aes(x=variable, y=value, color=variable)) +
+        geom_boxplot()
+    ```
+    As seen in the image, the lowest suicide rate is in the 25-34 age group and the highest in the 65-74 age group.
+    As the age increases, the suicide rate is gradually increasing.
+
+## 8. 
+The steam data in the `MASS` package has a nonlinear regression model, 
+\[P = \alpha \exp\left\{\frac{\beta t}{\gamma + t}\right\} + \varepsilon \]
+
+Fit the  model with `nls()` function and find the fitted values, using initial value $\alpha = 5, \beta = 20, \gamma = 200$. Plot them with the data points on the original scale.
+
+```{r message = F}
+library(MASS)
+data(steam)
+f <- function(t, a,b,g){
+    return (a*exp(b*t/(g+t)))
+}
+fitted.model <- nls(Press~f(Temp, a,b,g), 
+        data=steam, start=list(a=5,b=20,g=200))
+summary(fitted.model)
+steam <- steam %>% mutate(FittedModel = 
+                predict(fitted.model, steam))
+ggplot(steam) + geom_point(aes(Temp, Press, color="red"))+
+        geom_line(aes(Temp, Press, color="red")) +
+        geom_point(aes(Temp, FittedModel, color="blue"))+
+        geom_line(aes(Temp, FittedModel, color="blue"))
+```
+"red" is Press, while "blue" is FittedModel.

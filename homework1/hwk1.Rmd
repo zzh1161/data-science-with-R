@@ -1,0 +1,171 @@
+<h1 align = "center"> Homework 1 </h1>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval=TRUE, #在块中运行代码(default = TRUE)
+  tidy=FALSE, #是否整理代码
+  # prompt=TRUE, #代码是否添加引导符’>‘
+  highlight=TRUE, #高亮显示源码 (default = TRUE)
+  # comment="Result:", #结果的每一行加前缀(default = ‘##’)
+  echo=TRUE, #是否在输出中包含源代码
+  results="markup", #装裱markup、原样asis、隐藏hide、末尾hold
+  collapse=FALSE,#把所有的输出汇聚到单个块中(default = FALSE)
+  warning=FALSE,#是否在输出中包含警告(default = TRUE)
+  error=TRUE, #是否在输出中包含错误信息
+  message=FALSE, #是否在输出中包含参考的信息
+  split=FALSE, #是否将R的输出分割成单独的文件
+  include=TRUE, #运行后是否在文档中显示块 (default = TRUE)
+  cache = TRUE, #对代码段打开缓存
+  # cache.path="./cache_file/", #缓存结果的保存路径 (default = “cache/”)
+  # fig.path="figure/prefix-", #图片路径，支持非前缀模式(‘figure/’)
+  # fig.keep="high", #保存图形类型，高级high、不保存none’)、所有图形(‘all’)、第一张(‘first’)、最后一张(‘last’)
+  fig.show="asis", #展示方式，紧随代码asis、最后统一hold、动画animate
+  # fig.width=8, #可以用%表示
+  # fig.height=6, #图片文件的宽、高(英寸2.54cm 为单位)
+  # out.width=8,
+  # out.height=6, #图片在输出文档中的宽、高
+  fig.align="center" #对齐方式，不做调节(‘default’)、左(‘left’)、右(‘right’)、居中(‘center’)
+  # interval=1 #动画参数，切换画面时间，单位为秒
+)
+```
+
+1. code for assignment 1:
+    a. read **iowa.csv**
+    ```{r}
+    iowa.df = read.csv("iowa.csv", header=T, sep=";")
+    ```
+    b. how many rows and columns
+    ```{r}
+    sprintf("numbers of rows: %d", dim(iowa.df)[1])
+    sprintf("numbers of columns: %d", dim(iowa.df)[2])
+    ```
+    c. names of the columns
+    ```{r}
+    colnames(iowa.df)
+    ```
+    d. the value of row 5, column 7
+    ```{r}
+    iowa.df[5,7]
+    ```
+    e. display the second row
+    ```{r}
+    iowa.df[2,]
+    ```
+
+2. code for assignment 2:
+    a.
+    + `vector1 <- c("5", "12", "7", "32")` is correct;
+    + `max(vector1)` is correct, and the result is `"7"`;
+    + `sort(vector1)` is correct, and the result is `"12" "32" "5"  "7"`;
+    + `sum(vector1)` is wrong, because strings can't be summed.
+    b. 
+    + 
+      ```{r}
+      vector2 <- c("5",7,12)
+      vector2[2]+vector2[3]
+      ```
+    + 
+      ```{r}
+      dataframe3 <- data.frame(z1="5", z2=7, z3=12)
+      dataframe3[1,2]+dataframe3[1,3]
+      ```
+    + 
+      ```{r}
+      list4 <- list(z1="6", z2=42, z3="49", z4=126)
+      list4[[2]]+list4[[4]]
+      list4[2]+list4[4]
+      ```
+    
+3. code for the assignment 3:
+    a. 
+    ```{r}
+    seq(1, 10000, by=372)
+    seq(1, 10000, length.out=50)
+    ```
+    b. 
+    ```{r}
+    rep(1:3, times=3)
+    rep(1:3, each=3)
+    ```
+
+4. code for assignment MB.Ch1.2:
+    ```{r}
+    library(DAAG)
+    library(ggplot2)
+    data("orings")
+    df <- data.frame(orings[c(1,2,4,11,13,18),])
+    head(df)
+    ggplot(data=df,aes(x=Temperature,y=Total))+ geom_point()
+    ggplot(data=orings,aes(x=Temperature,y=Total))+ geom_point()
+    ```
+
+5. code for assignment MB.Ch1.4:
+	a.
+    ```{r}
+    library(DAAG)
+    data("ais")
+    str(ais)
+    ```
+    b.
+    ```{r}
+    kinds <- table(ais["sport"])
+    col <- names(kinds)
+    # initialize the dataframe
+    freq_table_genders = data.frame(
+        male  = seq(1,10),
+        female = seq(1,10)
+    )
+    row.names(freq_table_genders) <- col
+    for(i in seq(1,10)){
+        freq_table_genders[col[i],"male"] <- 
+                sum(ais$sex == "m" & ais$sport == col[i])
+        freq_table_genders[col[i],"female"] <-
+                sum(ais$sex == "f" & ais$sport == col[i])
+    }
+    # print the dataframe to show numbers of 
+    # different genders in each sports
+    print(freq_table_genders)
+    ```
+    From above, we see that in **netball**, there's a large imbalance in numbers of the two sexes.
+
+6. code for assignment MB.Ch1.6:
+    ```{r}
+    elevation <- c(217,254,248,254,253,227,178,207,217)
+    area      <- c(24387, 5374, 4624, 2247, 1353,
+                      1223, 1151, 755, 657)
+    Manitoba.lakes <- data.frame(elevation, area)
+    row.names(Manitoba.lakes) <- c("Winnipeg", "Winnipegosis",
+            "Manitoba", "SouthernIndian", "Cedar", "Island",
+            "Gods", "Cross", "Playgreen")
+    ```
+    a.
+    ```{r}
+    attach(Manitoba.lakes)
+    plot(log2(area)~elevation, pch=16, xlim=c(170,280))
+    # NB: Doubling the area increases log2(area) by 1.0
+    text(log2(area)~elevation, labels=row.names(Manitoba.lakes), pos=4)
+    text(log2(area)~elevation, labels=area, pos=2)
+    title("Manitoba's Largest Lakes")
+    ```
+    b.
+    ```{r}
+    attach(Manitoba.lakes)
+    plot(area~elevation, pch=16, xlim=c(170,280), ylog=T)
+    text(area~elevation, labels=row.names(Manitoba.lakes), pos=4, ylog=T)
+    text(area~elevation, labels=area, pos=2, ylog=T)
+    title("Manitoba's Largest Lakes")
+    ```
+
+7. code for assignment MB.Ch1.7:
+    ```{r}
+    dotchart(area, labels=row.names(Manitoba.lakes),
+             main = "Manitoba's Largest Lakes", 
+             xlab="area")
+    dotchart(log2(area), labels=row.names(Manitoba.lakes),
+             main = "Manitoba's Largest Lakes",
+             xlab="log2(area)")
+    ```
+
+8. code for assignment MB.Ch1.8:
+    ```{r}
+    sum(area)
+    ```
